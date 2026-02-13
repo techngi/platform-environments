@@ -129,3 +129,99 @@ docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
 
 - Open Jenkins from host:
 http://192.168.56.10:8080
+
+- Install plugins (minimum):
+* Pipeline
+* Git
+* Credentials Binding
+* Docker Pipeline
+* Blue Ocean (optional)
+* GitHub integration (optional)
+
+- Install CI tools on VM1 (AWS + K8s CLIs + scanners)
+
+```bash
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o awscliv2.zip
+unzip awscliv2.zip
+sudo ./aws/install
+aws --version
+```
+
+- Install KubeCtl
+
+```bash
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+kubectl version --client
+```
+
+- Install Helm
+
+```bash
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+helm version
+```
+
+- Install Trivy (image scan)
+
+```bash
+sudo apt -y install wget
+wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo gpg --dearmor -o /etc/apt/keyrings/trivy.gpg
+echo "deb [signed-by=/etc/apt/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" | sudo tee /etc/apt/sources.list.d/trivy.list
+sudo apt update && sudo apt -y install trivy
+trivy -v
+```
+
+# Create EKS in the cheapest way (NO NAT Gateway)
+
+- Download and install eksctl
+
+```bash
+curl -s --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+sudo mv /tmp/eksctl /usr/local/bin
+eksctl version
+```
+
+- Create and configure AWS credentials
+* Create AWS IAM user
+** Configure the user
+
+```bash
+aws configure
+# set region: ap-southeast-2 (Sydney)
+aws sts get-caller-identity
+```
+
+- Create AWS Cluster
+
+* Create YAML file to setup cluster in AWS
+
+```bash
+cat > cluster-public.yaml <<'YAML'
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: devops-hybrid
+  region: ap-southeast-2
+  version: "1.32"
+
+vpc:
+  nat:
+    gateway: Disable
+
+managedNodeGroups:
+  - name: ng-dev
+    instanceType: t3.small
+    desiredCapacity: 2
+    minSize: 1
+    maxSize: 2
+    privateNetworking: false
+    volumeSize: 30
+    ssh:
+      allow: false
+
+iam:
+  withOIDC: true
+YAML
+```
