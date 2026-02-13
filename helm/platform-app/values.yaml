@@ -47,7 +47,7 @@ securityContext: {}
   # runAsNonRoot: true
   # runAsUser: 1000
 
-containerPort: 80
+containerPort: 5000
 
 # This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
 service:
@@ -55,7 +55,7 @@ service:
   type: ClusterIP
   # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
   port: 80
-
+  targetPort: 5000
 # This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
 ingress:
   enabled: false
