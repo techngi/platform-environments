@@ -295,14 +295,16 @@ aws ecr list-images --repository-name devops-app --region ap-southeast-2
 
 # Update values.yaml and deployment.yaml files
 
+```bash
 envs/dev/values.yaml
 replicaCount: 1
 image:
   repository: 421869852482.dkr.ecr.ap-southeast-2.amazonaws.com/devops-app
   tag: "latest"
   pullPolicy: IfNotPresent
+```
 
-
+```bash
 helm/platform-app/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -382,6 +384,7 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+```
 
 # Create ArgoCD App
 
