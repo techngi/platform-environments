@@ -225,3 +225,180 @@ iam:
   withOIDC: true
 YAML
 ```
+
+```bash
+eksctl create cluster -f cluster-public.yaml
+
+aws eks describe-cluster --name devops-hybrid --region ap-southeast-2
+
+aws eks update-kubeconfig --name devops-hybrid --region ap-southeast-2
+
+kubectl get pods -A
+```
+
+# Create ArgoCD docker in AWS Cluster and access it
+
+```bash
+kubectl create namespace argocd
+
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+kubectl -n argocd get pods
+
+kubectl -n argocd port-forward svc/argocd-server 8085:80
+
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
+
+On Host from vagrant folder
+vagrant ssh-config
+ssh -i [IdentityFile] -L 8085:localhost:8085 vagrant@192.168.56.10
+
+- Now you can access from host machine
+http://localhost:8085
+```
+
+# Create Helm Chart
+
+```bash
+mkdir -p helm
+helm create helm/platform-app
+ls -la helm/platform-app
+```
+
+It should include Chart.yaml, values.yaml, templates/, etc.
+
+platform-environments/
+├── helm/
+│   └── platform-app/
+│       ├── Chart.yaml
+│       ├── templates/
+│       └── values.yaml        ← default values
+│
+envs/
+    ├── dev/
+    │   └── values.yaml        ← dev overrides
+    └── prod/
+        └── values.yaml        ← prod overrides
+
+# Create ECR Repository and upload image
+
+```bash
+aws ecr create-repository --repository-name devops-app --region ap-southeast-2
+aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin 421869852482.dkr.ecr.ap-southeast-2.amazonaws.com
+
+
+docker pull sanaqvi573/week3-app:latest
+docker tag sanaqvi573/week3-app:latest 421869852482.dkr.ecr.ap-southeast-2.amazonaws.com/devops-app:latest
+docker push 421869852482.dkr.ecr.ap-southeast-2.amazonaws.com/devops-app:latest
+aws ecr list-images --repository-name devops-app --region ap-southeast-2
+```
+
+# Update values.yaml and deployment.yaml files
+
+envs/dev/values.yaml
+replicaCount: 1
+image:
+  repository: 421869852482.dkr.ecr.ap-southeast-2.amazonaws.com/devops-app
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+
+helm/platform-app/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "platform-app.fullname" . }}
+  labels:
+    {{- include "platform-app.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "platform-app.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "platform-app.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "platform-app.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.containerPort }}
+              protocol: TCP
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+# Create ArgoCD App
+
+- Install ArgoCD CLI
+
+```bash
+sudo curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+sudo chmod +x /usr/local/bin/argocd
+argocd version --client
+
+argocd login localhost:8085 --username admin --password <PASTE_PASSWORD> --insecure
+
+kubectl create namespace devops-platforms
+```bash
+
+- Create the app
+
+```bash
+argocd app create platforms-app-dev --repo https://github.com/techngi/platform-environments.git --path helm/platform-app --dest-namespace devops-platforms --dest-server https://kubernetes.default.svc --values ../../envs/dev/values.yaml --sync-policy automated
+```
