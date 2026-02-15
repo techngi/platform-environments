@@ -295,8 +295,9 @@ aws ecr list-images --repository-name devops-app --region ap-southeast-2
 
 # Update values.yaml and deployment.yaml files
 
+- envs/dev/values.yaml
+  
 ```bash
-envs/dev/values.yaml
 replicaCount: 1
 image:
   repository: 421869852482.dkr.ecr.ap-southeast-2.amazonaws.com/devops-app
@@ -304,8 +305,9 @@ image:
   pullPolicy: IfNotPresent
 ```
 
+- helm/platform-app/templates/deployment.yaml
+  
 ```bash
-helm/platform-app/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
