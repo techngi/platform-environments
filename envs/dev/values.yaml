@@ -1,5 +1,5 @@
 replicaCount: 1
 image:
   repository: 421869852482.dkr.ecr.ap-southeast-2.amazonaws.com/devops-app
-  tag: "7f49650"
+  tag: "3fd2d75"
   pullPolicy: IfNotPresent
