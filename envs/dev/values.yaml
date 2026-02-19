@@ -1,5 +1,32 @@
 replicaCount: 1
+
 image:
   repository: 421869852482.dkr.ecr.ap-southeast-2.amazonaws.com/devops-app
-  tag: "latest"
+  tag: "3fd2d75"
   pullPolicy: IfNotPresent
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  timeoutSeconds: 2
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 2
+  failureThreshold: 3
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
