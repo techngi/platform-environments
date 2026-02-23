@@ -37,3 +37,7 @@ autoscaling:
   maxReplicas: 8
   targetCPUUtilizationPercentage: 60
   targetMemoryUtilizationPercentage: 70
+
+pdb:
+  enabled: true
+  maxUnavailable: 1
