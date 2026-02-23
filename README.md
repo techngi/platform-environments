@@ -407,3 +407,253 @@ kubectl create namespace devops-platforms
 ```bash
 argocd app create platforms-app-dev --repo https://github.com/techngi/platform-environments.git --path helm/platform-app --dest-namespace devops-platforms --dest-server https://kubernetes.default.svc --values ../../envs/dev/values.yaml --sync-policy automated
 ```
+
+### Production Hardening & Reliability Enhancements
+1 - Liveness & Readiness Probes
+Liveness probe ensures unhealthy containers are restarted automatically.
+Readiness probe ensures traffic is only routed to healthy pods.
+Improves availability and prevents failed deployments from serving traffic.
+
+* Helm Template Support (deployment.yaml)
+
+```bash
+{{- with .Values.livenessProbe }}
+livenessProbe:
+  {{- toYaml . | nindent 12 }}
+{{- end }}
+{{- with .Values.readinessProbe }}
+readinessProbe:
+  {{- toYaml . | nindent 12 }}
+{{- end }}
+```
+
+values.yaml Configuration
+
+```bash
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  timeoutSeconds: 2
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 2
+  failureThreshold: 3
+```
+
+2 - Resource Requests & Limits
+
+deployment.yaml Verification
+
+```bash
+resources:
+  {{- toYaml . | nindent 12 }}
+```
+
+values.yaml Configuration
+Guarantees minimum compute allocation.
+Prevents noisy neighbor issues.
+Required for effective HPA autoscaling.
+
+- Aligns with Kubernetes best practices for production workloads.
+
+```bash
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+```bash
+
+3️⃣ Horizontal Pod Autoscaler (HPA)
+Autoscaling is configured using Kubernetes autoscaling/v2 API with CPU and memory metrics.
+
+Enables dynamic scaling based on workload.
+Prevents over-provisioning.
+Demonstrates production-grade elasticity.
+
+- Metrics Server Validation
+
+```bash
+kubectl get deployment metrics-server -n kube-system
+kubectl top pods -n <namespace>
+kubectl top nodes
+```
+
+HPA Configuration (hpa.yaml)
+
+```bash
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: platform-app-hpa
+  namespace: devops-platforms
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: platform-app
+  minReplicas: 2
+  maxReplicas: 8
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 60
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 70
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 60
+    scaleDown:
+      stabilizationWindowSeconds: 180
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 60
+```
+
+Helm Integration
+
+deployment.yaml:
+
+```bash
+{{- if not .Values.autoscaling.enabled }}
+replicas: {{ .Values.replicaCount }}
+{{- end }}
+```
+
+values.yaml:
+
+```bash
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 8
+  targetCPUUtilizationPercentage: 60
+  targetMemoryUtilizationPercentage: 70
+```
+
+Load Testing to Validate Scaling
+
+```bash
+kubectl run -i --tty loadgen --rm --image=busybox -- /bin/sh
+
+Inside pod:
+
+while true; do wget -q -O- http://platforms-app-dev-platform-app.devops-platforms.svc.cluster.local/health >/dev/null; done
+
+Monitor:
+
+kubectl get hpa -n devops-platforms -w
+kubectl get deploy platforms-app-dev-platform-app -n devops-platforms -w
+kubectl top pods -n devops-platforms --watch
+
+```
+
+5. PodDisruptionBudget (PDB)
+
+PDB protects availability during voluntary disruptions such as:
+
+Node drain
+
+Cluster upgrades
+
+Rolling maintenance
+
+It does not protect against application crashes.
+
+templates/pdb.yaml
+
+```bash
+{{- if .Values.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "platform-app.fullname" . }}-pdb
+  labels:
+    {{- include "platform-app.labels" . | nindent 4 }}
+spec:
+  maxUnavailable: {{ .Values.pdb.maxUnavailable }}
+  selector:
+    matchLabels:
+      {{- include "platform-app.selectorLabels" . | nindent 6 }}
+{{- end }}
+```
+
+
+values.yaml:
+
+``` bash
+pdb:
+  enabled: true
+  maxUnavailable: 1
+
+Verify:
+
+kubectl get pdb -n devops-platforms
+kubectl describe pdb <release-name>-pdb -n devops-platforms
+```
+
+
+### GitOps-Based Rollback Strategy
+
+This project follows GitOps best practices with ArgoCD.
+
+ArgoCD automatically syncs and restores the previous stable state.
+This ensures:
+Full audit trail
+Version-controlled recovery
+Immutable infrastructure history
+
+
+```bash
+Primary Rollback — Git Revert
+git revert <bad-commit-sha>
+git push
+```
+
+Emergency Rollback — ArgoCD CLI
+
+```bash
+kubectl -n argocd port-forward svc/argocd-server 8081:443
+
+kubectl -n argocd get secret argocd-initial-admin-secret \
+-o jsonpath="{.data.password}" | base64 -d && echo
+
+argocd login localhost:8081 --insecure
+
+argocd app history <app-name>
+argocd app rollback <app-name> <history-id>
+```bash
+
+Application Rollback Flow
+
+```bash
+git log
+git revert <bad-commit>
+git push
+
+```
+ArgoCD detects drift and restores cluster state automatically.
+
