@@ -1,0 +1,12 @@
+# Create ECR Repository and upload image
+
+```bash
+aws ecr create-repository --repository-name devops-app --region ap-southeast-2
+aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin 421869852482.dkr.ecr.ap-southeast-2.amazonaws.com
+
+
+docker pull sanaqvi573/week3-app:latest
+docker tag sanaqvi573/week3-app:latest 421869852482.dkr.ecr.ap-southeast-2.amazonaws.com/devops-app:latest
+docker push 421869852482.dkr.ecr.ap-southeast-2.amazonaws.com/devops-app:latest
+aws ecr list-images --repository-name devops-app --region ap-southeast-2
+```
