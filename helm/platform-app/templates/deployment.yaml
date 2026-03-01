@@ -19,8 +19,8 @@ spec:
       serviceAccountName: {{ include "platform-app.serviceAccountName" . }}
       containers:
         - name: {{ .Chart.Name }}
-         {{- $repo := required "image.repository is required" .Values.image.repository -}}
-         image: "{{ $repo }}:{{ default .Chart.AppVersion .Values.image.tag }}"
+          {{- $repo := required "image.repository is required" .Values.image.repository -}}
+          image: "{{ $repo }}:{{ default .Chart.AppVersion .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
 
           ports:
