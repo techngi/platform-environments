@@ -1,9 +1,5 @@
-### Overview
-GitOps deployment repository for Platform App (ArgoCD + Helm + EKS)
-
-This repository contains GitOps deployment configuration for the Platform App.  
-It manages application deployment to AWS EKS using ArgoCD + Helm.  
-Values for dev and prod environments are stored separately.
+### Overview - GitOps deployment repository for Platform App (ArgoCD + Helm + EKS)
+This repository contains GitOps deployment configuration for the Platform App. It manages application deployment to AWS EKS using ArgoCD + Helm. Values for dev and prod environments are stored separately.
 
 ### Hybrid Setup using local VM and AWS EKS
 
