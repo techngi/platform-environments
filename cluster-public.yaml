@@ -1,6 +1,5 @@
 apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
-
 metadata:
   name: devops-hybrid
   region: ap-southeast-2
@@ -10,11 +9,9 @@ metadata:
     CostCenter: learning
     Owner: techngi
     Project: platform-environments
-
 vpc:
   nat:
-    gateway: Disable  # cost-optimised lab setup
-
+    gateway: Disable # cost-optimised lab setup
 managedNodeGroups:
   - name: ng-dev
     instanceType: t3.small
@@ -28,6 +25,5 @@ managedNodeGroups:
       role: general
     ssh:
       allow: false
-
 iam:
   withOIDC: true

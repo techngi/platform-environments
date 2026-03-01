@@ -1,12 +1,9 @@
 replicaCount: 2
-
 containerPort: 8080
-
 image:
   repository: 421869852482.dkr.ecr.ap-southeast-2.amazonaws.com/devops-app
-  tag: "05e9d60"
+  tag: 05e9d60
   pullPolicy: IfNotPresent
-
 livenessProbe:
   httpGet:
     path: /health
@@ -15,7 +12,6 @@ livenessProbe:
   periodSeconds: 10
   timeoutSeconds: 2
   failureThreshold: 3
-
 readinessProbe:
   httpGet:
     path: /health
@@ -24,7 +20,6 @@ readinessProbe:
   periodSeconds: 5
   timeoutSeconds: 2
   failureThreshold: 3
-
 resources:
   requests:
     cpu: 100m
@@ -32,11 +27,10 @@ resources:
   limits:
     cpu: 500m
     memory: 384Mi
-
 autoscaling:
   enabled: true
   minReplicas: 2
-  maxReplicas: 4   # capped for lab cost
+  maxReplicas: 4 # capped for lab cost
   targetCPUUtilizationPercentage: 60
   targetMemoryUtilizationPercentage: 70
   behavior:
@@ -52,11 +46,9 @@ autoscaling:
         - type: Percent
           value: 50
           periodSeconds: 60
-
 pdb:
   enabled: true
   maxUnavailable: 1
-
 nodeSelector: {}
 tolerations: []
 affinity: {}
