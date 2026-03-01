@@ -5,10 +5,15 @@ metadata:
   name: devops-hybrid
   region: ap-southeast-2
   version: "1.32"
+  tags:
+    Environment: lab
+    CostCenter: learning
+    Owner: techngi
+    Project: platform-environments
 
 vpc:
   nat:
-    gateway: Disable
+    gateway: Disable  # cost-optimised lab setup
 
 managedNodeGroups:
   - name: ng-dev
@@ -18,6 +23,9 @@ managedNodeGroups:
     maxSize: 2
     privateNetworking: false
     volumeSize: 30
+    labels:
+      env: lab
+      role: general
     ssh:
       allow: false
 
