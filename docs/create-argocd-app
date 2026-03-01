@@ -1,0 +1,19 @@
+# Create ArgoCD App
+
+- Install ArgoCD CLI
+
+```bash
+sudo curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+sudo chmod +x /usr/local/bin/argocd
+argocd version --client
+
+argocd login localhost:8085 --username admin --password <PASTE_PASSWORD> --insecure
+
+kubectl create namespace devops-platforms
+```bash
+
+- Create the app
+
+```bash
+argocd app create platforms-app-dev --repo https://github.com/techngi/platform-environments.git --path helm/platform-app --dest-namespace devops-platforms --dest-server https://kubernetes.default.svc --values ../../envs/dev/values.yaml --sync-policy automated
+```
