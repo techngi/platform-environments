@@ -1,0 +1,16 @@
+### Create GitOps repo on GitHub
+
+```bash
+mkdir -p ~/platform-environments
+cd ~/platform-environments
+git init
+sudo nano README.md
+git add README.md
+git config --global user.email "sanaqvi573@gmail.com"
+git config --global user.name "Syed Sohail Abbas"
+git commit -m "Initial Commit"
+git remote add origin https://github.com/techngi/platform-environments.git
+git push -u origin master
+
+mkdir -p helm/week3-app envs/dev envs/prod
+```
