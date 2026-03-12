@@ -257,9 +257,10 @@ kubectl logs -n logging <fluent-bit-pod>
 ```
 
 # Key Benefits
- Centralized cluster logging
- Persistent logs even if pods restart
- Faster incident debugging
- Log analytics using CloudWatch Logs Insights
- Alerting based on log patterns
-
+```markdown
+ - Centralized cluster logging
+ - Persistent logs even if pods restart
+ - Faster incident debugging
+ - Log analytics using CloudWatch Logs Insights
+ - Alerting based on log patterns
+```
