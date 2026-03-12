@@ -19,17 +19,17 @@ This enables:
 ## Architecture
 
 Kubernetes Pods
-│
-▼
+   │
+   ▼
 Container Logs (/var/log/containers)
-│
-▼
+   │
+   ▼
 Fluent Bit DaemonSet
-│
-▼
+   │
+   ▼
 AWS CloudWatch Logs
-│
-▼
+   │
+   ▼
 CloudWatch Logs Insights / Alerts
 ```
 
