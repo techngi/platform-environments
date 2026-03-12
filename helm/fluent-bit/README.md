@@ -82,11 +82,7 @@ Create a policy allowing Fluent Bit to write logs to CloudWatch.
     }
   ]
 }
-```
 
-Create policy:
-
-```bash
 aws iam create-policy \
   --policy-name FluentBitCloudWatchLogsPolicy \
   --policy-document file://fluentbit-cloudwatch-policy.json
@@ -154,44 +150,35 @@ Configure output:
     auto_create_group     true
 
 Restart Fluent Bit:
-
-
 kubectl rollout restart daemonset aws-for-fluent-bit -n logging
+
 Verification
 
 Check Fluent Bit pods:
-
 kubectl get pods -n logging
 
 Check Fluent Bit logs:
-
 kubectl logs -n logging -l app.kubernetes.io/name=aws-for-fluent-bit
 
 Verify CloudWatch log group:
-
 aws logs describe-log-groups \
   --region ap-southeast-2 \
   --log-group-name-prefix "/aws/eks/fluentbit-cloudwatch"
 
 Check log streams:
-
 aws logs describe-log-streams \
   --log-group-name /aws/eks/fluentbit-cloudwatch/logs \
   --region ap-southeast-2
+
 Viewing Logs
-
 Logs can be viewed in the AWS Console:
-
 CloudWatch → Logs → Log Groups
 
 Log group:
-
 /aws/eks/fluentbit-cloudwatch/logs
 
 Use CloudWatch Logs Insights to query logs.
-
 Example query:
-
 fields @timestamp, log
 | filter log like /ERROR/
 | sort @timestamp desc
@@ -205,17 +192,17 @@ Example workflow:
 
 ```markdown
 Fluent Bit
-│
-▼
+  │
+  ▼
 CloudWatch Logs
-│
-▼
+  │
+  ▼
 Metric Filter 
-│
-▼
+  │
+  ▼
 CloudWatch Alarm
-│
-▼
+  │
+  ▼
 SNS Notification
 ```
 
@@ -224,34 +211,34 @@ Example alert pattern:
 ERROR
 ```
 This can trigger alerts via:
-Email
-Slack
-PagerDuty
-OpsGenie
+- Email
+- Slack
+- PagerDuty
+- OpsGenie
 
-### Troubleshooting
-# IRSA not working
+# Troubleshooting
+- IRSA not working
+
 Check service account annotation:
 ```bash
 kubectl get sa aws-for-fluent-bit -n logging -o yaml
 ```
 
-Wrong AWS region
-Ensure Fluent Bit output configuration matches the cluster region:
+- Wrong AWS region
 
+Ensure Fluent Bit output configuration matches the cluster region:
 ```bash
 region ap-southeast-2
 ```
-CloudFormation stack failure
-Delete failed stack and recreate IRSA:
 
+- CloudFormation stack failure
+Delete failed stack and recreate IRSA:
 ```bash
 aws cloudformation delete-stack ...
 ```
 
-Fluent Bit not sending logs
+- Fluent Bit not sending logs
 Check Fluent Bit logs:
-
 ```bash
 kubectl logs -n logging <fluent-bit-pod>
 ```
