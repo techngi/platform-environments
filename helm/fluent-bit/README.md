@@ -203,53 +203,63 @@ CloudWatch allows alerts to be triggered based on log patterns.
 
 Example workflow:
 
-Fluent Bit → CloudWatch Logs → Metric Filter → CloudWatch Alarm → SNS Notification
+```markdown
+Fluent Bit
+│
+▼
+CloudWatch Logs
+│
+▼
+Metric Filter 
+│
+▼
+CloudWatch Alarm
+│
+▼
+SNS Notification
+```
 
 Example alert pattern:
-
+```
 ERROR
-
+```
 This can trigger alerts via:
-
 Email
-
 Slack
-
 PagerDuty
-
 OpsGenie
 
-Troubleshooting
-IRSA not working
-
+### Troubleshooting
+# IRSA not working
 Check service account annotation:
-
+```bash
 kubectl get sa aws-for-fluent-bit -n logging -o yaml
-Wrong AWS region
+```
 
+Wrong AWS region
 Ensure Fluent Bit output configuration matches the cluster region:
 
+```bash
 region ap-southeast-2
+```
 CloudFormation stack failure
-
 Delete failed stack and recreate IRSA:
 
+```bash
 aws cloudformation delete-stack ...
-Fluent Bit not sending logs
+```
 
+Fluent Bit not sending logs
 Check Fluent Bit logs:
 
+```bash
 kubectl logs -n logging <fluent-bit-pod>
-Key Benefits
+```
 
-Centralized cluster logging
+# Key Benefits
+ Centralized cluster logging
+ Persistent logs even if pods restart
+ Faster incident debugging
+ Log analytics using CloudWatch Logs Insights
+ Alerting based on log patterns
 
-Persistent logs even if pods restart
-
-Faster incident debugging
-
-Log analytics using CloudWatch Logs Insights
-
-Alerting based on log patterns
-
-Future Improvements
