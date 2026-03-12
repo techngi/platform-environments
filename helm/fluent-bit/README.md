@@ -16,6 +16,7 @@ This enables:
 ---
 
 ## Architecture
+
 Kubernetes Pods
 │
 ▼
