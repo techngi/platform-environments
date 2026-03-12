@@ -183,9 +183,9 @@ fields @timestamp, log
 | filter log like /ERROR/
 | sort @timestamp desc
 | limit 50
-Alerting
 ```
 
+# Alerting
 CloudWatch allows alerts to be triggered based on log patterns.
 
 Example workflow:
