@@ -1,0 +1,8 @@
+cloudWatch:
+  region: ap-southeast-2
+  logGroupName: /aws/eks/fluentbit-cloudwatch/logs
+  logStreamPrefix: fluentbit-
+
+serviceAccount:
+  create: false
+  name: aws-for-fluent-bit
