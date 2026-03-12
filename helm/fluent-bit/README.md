@@ -15,6 +15,7 @@ This enables:
 
 ---
 
+```markdown
 ## Architecture
 
 Kubernetes Pods
@@ -30,7 +31,7 @@ AWS CloudWatch Logs
 │
 ▼
 CloudWatch Logs Insights / Alerts
-
+```
 
 Each node runs a Fluent Bit pod that collects logs from containers and sends them to CloudWatch using **IAM Roles for Service Accounts (IRSA)**.
 
