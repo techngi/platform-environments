@@ -31,21 +31,6 @@ Kubernetes Cluster
   Dashboards & Alerts
 ```
 
-# Repository Structure
-
-```Markdown
-platform-environments
-│
-├── helm
-│   └── monitoring
-│       ├── values.yaml
-│       └── README.md
-│
-└── envs
-    └── dev
-        └── monitoring.yaml
-```
-
 # Step 1 — Create monitoring values file
 Create:
 ```bash
