@@ -60,8 +60,9 @@ aws eks describe-cluster \
 
 1. Create IAM Policy for CloudWatch Logs
 
-```bash
 Create a policy allowing Fluent Bit to write logs to CloudWatch.
+
+```json
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -78,7 +79,11 @@ Create a policy allowing Fluent Bit to write logs to CloudWatch.
     }
   ]
 }
+```
 
+Create the policy:
+
+```bash
 aws iam create-policy \
   --policy-name FluentBitCloudWatchLogsPolicy \
   --policy-document file://fluentbit-cloudwatch-policy.json
@@ -119,52 +124,55 @@ helm upgrade --install aws-for-fluent-bit eks/aws-for-fluent-bit \
   -f helm/fluent-bit/values.yaml
 ```
 
-Verification
+## Verification
 
 Check Fluent Bit pods:
+
+```bash
 kubectl get pods -n logging
+```
 
 Check Fluent Bit logs:
+
+```bash
 kubectl logs -n logging -l app.kubernetes.io/name=aws-for-fluent-bit
+```
 
 Verify CloudWatch log group:
+
+```bash
 aws logs describe-log-groups \
   --region ap-southeast-2 \
   --log-group-name-prefix "/aws/eks/fluentbit-cloudwatch"
+```
 
 Check log streams:
+
+```bash
 aws logs describe-log-streams \
   --log-group-name /aws/eks/fluentbit-cloudwatch/logs \
   --region ap-southeast-2
+```
 
-Viewing Logs
-Logs can be viewed in the AWS Console:
-CloudWatch → Logs → Log Groups
-
-Log group:
-/aws/eks/fluentbit-cloudwatch/logs
-
-Use CloudWatch Logs Insights to query logs.
 Example query:
+
+```sql
 fields @timestamp, log
 | filter log like /ERROR/
 | sort @timestamp desc
 | limit 50
 ```
 
-# Alerting
-CloudWatch allows alerts to be triggered based on log patterns.
-
 Example workflow:
 
-```markdown
+```
 Fluent Bit
   │
   ▼
 CloudWatch Logs
   │
   ▼
-Metric Filter 
+Metric Filter
   │
   ▼
 CloudWatch Alarm
@@ -210,11 +218,10 @@ Check Fluent Bit logs:
 kubectl logs -n logging <fluent-bit-pod>
 ```
 
-# Key Benefits
-```markdown
- - Centralized cluster logging
- - Persistent logs even if pods restart
- - Faster incident debugging
- - Log analytics using CloudWatch Logs Insights
- - Alerting based on log patterns
-```
+## Key Benefits
+
+- Centralized cluster logging
+- Persistent logs even if pods restart
+- Faster incident debugging
+- Log analytics using CloudWatch Logs Insights
+- Alerting based on log patterns
