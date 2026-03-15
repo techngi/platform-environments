@@ -15,9 +15,9 @@ This enables:
 
 ---
 
-```markdown
 ## Architecture
 
+```
 Kubernetes Pods
    │
    ▼
@@ -54,15 +54,11 @@ aws eks describe-cluster \
   --name devops-hybrid \
   --region ap-southeast-2 \
   --query "cluster.identity.oidc.issuer"
-
-Deployment Steps
-1. Create Namespace
-
-```bash
-kubectl create namespace logging
 ```
 
-2. Create IAM Policy for CloudWatch Logs
+# Deployment Steps
+
+1. Create IAM Policy for CloudWatch Logs
 
 ```bash
 Create a policy allowing Fluent Bit to write logs to CloudWatch.
@@ -88,7 +84,7 @@ aws iam create-policy \
   --policy-document file://fluentbit-cloudwatch-policy.json
 ```
 
-3. Create IAM Role for Service Account (IRSA)
+2. Create IAM Role for Service Account (IRSA)
 
 ```bash
 eksctl create iamserviceaccount \
@@ -112,45 +108,16 @@ You should see:
 eks.amazonaws.com/role-arn: arn:aws:iam::<ACCOUNT_ID>:role/...
 ```
 
-4. Install Fluent Bit using Helm
+3. Install Fluent Bit using Helm
 
-Add AWS Helm repository:
-
-```bash
-helm repo add eks https://aws.github.io/eks-charts
-helm repo update
-```
-
-Install Fluent Bit:
+Create namespace and Install Fluent Bit:
 
 ```bash
 helm upgrade --install aws-for-fluent-bit eks/aws-for-fluent-bit \
   --namespace logging \
-  --set serviceAccount.create=false \
-  --set serviceAccount.name=aws-for-fluent-bit
+  --create-namespace \
+  -f helm/fluent-bit/values.yaml
 ```
-
-5. Configure CloudWatch Output
-
-Edit Fluent Bit ConfigMap:
-
-```bash
-kubectl -n logging edit cm aws-for-fluent-bit
-```
-
-Configure output:
-
-```bash
-[OUTPUT]
-    Name                  cloudwatch_logs
-    Match                 *
-    region                ap-southeast-2
-    log_group_name        /aws/eks/fluentbit-cloudwatch/logs
-    log_stream_prefix     fluentbit-
-    auto_create_group     true
-
-Restart Fluent Bit:
-kubectl rollout restart daemonset aws-for-fluent-bit -n logging
 
 Verification
 
