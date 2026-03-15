@@ -11,6 +11,7 @@ The stack collects:
 
 # Architecture
 
+```Markdown
 Kubernetes Cluster
         │
         │
@@ -28,9 +29,11 @@ Kubernetes Cluster
         │
         ▼
   Dashboards & Alerts
+```
 
 # Repository Structure
 
+```Markdown
 platform-environments
 │
 ├── helm
@@ -41,6 +44,7 @@ platform-environments
 └── envs
     └── dev
         └── monitoring.yaml
+```
 
 # Step 1 — Create monitoring values file
 Create:
