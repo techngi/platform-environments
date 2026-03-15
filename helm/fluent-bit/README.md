@@ -56,9 +56,17 @@ aws eks describe-cluster \
   --query "cluster.identity.oidc.issuer"
 ```
 
-# Deployment Steps
+## Deployment Steps
 
-1. Create IAM Policy for CloudWatch Logs
+1. Create Namespace
+
+Create the `logging` namespace
+
+```bash
+kubectl create namespace logging
+```
+
+2. Create IAM Policy for CloudWatch Logs
 
 Create a policy allowing Fluent Bit to write logs to CloudWatch.
 
@@ -89,7 +97,7 @@ aws iam create-policy \
   --policy-document file://fluentbit-cloudwatch-policy.json
 ```
 
-2. Create IAM Role for Service Account (IRSA)
+3. Create IAM Role for Service Account (IRSA)
 
 ```bash
 eksctl create iamserviceaccount \
@@ -113,16 +121,15 @@ You should see:
 eks.amazonaws.com/role-arn: arn:aws:iam::<ACCOUNT_ID>:role/...
 ```
 
-3. Install Fluent Bit using Helm
+4. Deploy Fluent Bit using GitOps
 
-Create namespace and Install Fluent Bit:
+Fluent Bit is deployed through ArgoCD using the manifests stored in this repository.
 
-```bash
-helm upgrade --install aws-for-fluent-bit eks/aws-for-fluent-bit \
-  --namespace logging \
-  --create-namespace \
-  -f helm/fluent-bit/values.yaml
-```
+ArgoCD application manifest:
+envs/dev/fluent-bit.yaml
+
+Helm configuration:
+helm/fluent-bit/values.yaml
 
 ## Verification
 
