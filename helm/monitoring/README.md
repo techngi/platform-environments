@@ -1,6 +1,8 @@
 # Step 1 — Create monitoring values file
 Create:
+```bash
 helm/monitoring/values.yaml
+```
 
 ```YAML
 grafana:
