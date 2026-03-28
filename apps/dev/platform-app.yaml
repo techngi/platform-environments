@@ -9,7 +9,7 @@ spec:
 
   source:
     repoURL: https://github.com/techngi/platform-environments.git
-    targetRevision: main
+    targetRevision: master
     path: helm/platform-app
     helm:
       valueFiles:
