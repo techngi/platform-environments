@@ -1,7 +1,7 @@
 replicaCount: 2
 containerPort: 8080
 image:
-  repository: 914339264187.dkr.ecr.ap-southeast-2.amazonaws.com/week3-app
+  repository: 914339264187.dkr.ecr.ap-southeast-2.amazonaws.com/devops-app
   tag: "d515a3d"
   pullPolicy: IfNotPresent
 livenessProbe:

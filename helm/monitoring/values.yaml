@@ -1,16 +1,14 @@
-kube-prometheus-stack:
+grafana:
+  adminPassword: admin123
+  service:
+    type: ClusterIP
 
-  grafana:
-    adminPassword: admin123
-    service:
-      type: LoadBalancer
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
 
-  prometheus:
-    prometheusSpec:
-      serviceMonitorSelectorNilUsesHelmValues: false
+alertmanager:
+  enabled: true
 
-  alertmanager:
-    enabled: true
-
-  nodeExporter:
-    enabled: true
+nodeExporter:
+  enabled: true

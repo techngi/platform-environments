@@ -1,29 +1,24 @@
 apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
+
 metadata:
   name: devops-hybrid
   region: ap-southeast-2
-  version: "1.32"
-  tags:
-    Environment: lab
-    CostCenter: learning
-    Owner: techngi
-    Project: platform-environments
+
 vpc:
   nat:
-    gateway: Disable # cost-optimised lab setup
+    gateway: Disable
+
 managedNodeGroups:
   - name: ng-dev
     instanceType: t3.small
-    desiredCapacity: 2
-    minSize: 1
+    desiredCapacity: 1
+    minSize: 0
     maxSize: 2
-    privateNetworking: false
-    volumeSize: 30
-    labels:
-      env: lab
-      role: general
+    volumeSize: 20
     ssh:
       allow: false
+    privateNetworking: false
+
 iam:
   withOIDC: true
