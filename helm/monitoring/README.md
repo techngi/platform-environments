@@ -94,7 +94,7 @@ spec:
 
   source:
     repoURL: https://github.com/techngi/platform-environments
-    targetRevision: main
+    targetRevision: master
     path: helm/monitoring
 
   destination:
