@@ -2,7 +2,7 @@ replicaCount: 2
 containerPort: 8080
 image:
   repository: 914339264187.dkr.ecr.ap-southeast-2.amazonaws.com/devops-app
-  tag: "2a6d351"
+  tag: "5b36629"
   pullPolicy: IfNotPresent
 livenessProbe:
   httpGet:
