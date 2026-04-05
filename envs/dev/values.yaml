@@ -42,7 +42,7 @@ strategy:
     maxSurge: 1
 
 autoscaling:
-  enabled: true
+  enabled: false
   minReplicas: 2
   maxReplicas: 4 # capped for lab cost
   targetCPUUtilizationPercentage: 60
