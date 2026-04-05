@@ -14,7 +14,7 @@ livenessProbe:
   failureThreshold: 3
 readinessProbe:
   httpGet:
-    path: xxx
+    path: /health
     port: http
   initialDelaySeconds: 5
   periodSeconds: 5
@@ -42,7 +42,7 @@ strategy:
     maxSurge: 1
 
 autoscaling:
-  enabled: false
+  enabled: true
   minReplicas: 2
   maxReplicas: 4 # capped for lab cost
   targetCPUUtilizationPercentage: 60
