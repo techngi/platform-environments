@@ -41,6 +41,10 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           {{- end }}
 
+          envFrom:
+            - configMapRef:
+                name: {{ include "platform-app.fullname" . }}-config
+
           {{- if .Values.env }}
           env:
             {{- toYaml .Values.env | nindent 12 }}

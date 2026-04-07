@@ -159,3 +159,8 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+appConfig:
+  APP_VERSION: "dev"
+  APP_ENV: "dev"
+  LOG_LEVEL: "info"

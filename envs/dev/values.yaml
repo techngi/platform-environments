@@ -4,6 +4,10 @@ image:
   repository: 914339264187.dkr.ecr.ap-southeast-2.amazonaws.com/devops-app
   tag: "b266800"
   pullPolicy: IfNotPresent
+appConfig:
+  APP_VERSION: "b266800"
+  APP_ENV: "dev"
+  LOG_LEVEL: "info"
 livenessProbe:
   httpGet:
     path: /health
