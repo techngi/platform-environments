@@ -2,7 +2,7 @@ replicaCount: 2
 containerPort: 5000
 image:
   repository: 914339264187.dkr.ecr.ap-southeast-2.amazonaws.com/devops-app
-  tag: "599146e"
+  tag: "76ca86d"
   pullPolicy: IfNotPresent
 appConfig:
   APP_VERSION: "b266800"
