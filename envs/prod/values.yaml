@@ -1,1 +1,72 @@
+replicaCount: 2
+containerPort: 5000
+image:
+  repository: 914339264187.dkr.ecr.ap-southeast-2.amazonaws.com/devops-app
+  tag: "10c206a"
+  pullPolicy: IfNotPresent
+appConfig:
+  APP_VERSION: "10c206a"
+  APP_ENV: "production"
+  LOG_LEVEL: "info"
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  timeoutSeconds: 2
+  failureThreshold: 3
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 2
+  failureThreshold: 3
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 384Mi
+startupProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 5
+  timeoutSeconds: 2
+  failureThreshold: 30
+  periodSeconds: 10
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 1
+    maxSurge: 1
 
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 4 # capped for lab cost
+  targetCPUUtilizationPercentage: 60
+  targetMemoryUtilizationPercentage: 70
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 60
+    scaleDown:
+      stabilizationWindowSeconds: 180
+      policies:
+        - type: Percent
+          value: 50
+          periodSeconds: 60
+pdb:
+  enabled: true
+  maxUnavailable: 1
+nodeSelector: {}
+tolerations: []
+affinity: {}
