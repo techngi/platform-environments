@@ -1,202 +1,138 @@
-# 📦 platform-environments
+# 🌍 Platform Environments (GitOps Deployment)
 
-GitOps deployment repository for the Platform Application.  
-This repository manages Kubernetes deployments on AWS EKS using **Helm + ArgoCD**.
+This repository manages Kubernetes deployments using **GitOps principles** with ArgoCD and Helm.
 
 ---
 
-## 🧠 Overview
+## 🧩 Overview
 
-This repository is responsible for:
+This repo represents the **desired state of infrastructure and applications**, enabling automated and reliable deployments.
 
-- Deploying the application to EKS
-- Managing environment-specific configuration (dev / prod)
-- Enforcing production reliability patterns
-- Handling GitOps-based rollbacks
-- Implementing autoscaling and availability controls
+It supports:
 
-The application source and CI pipeline live in the `platform-app` repository.  
-This repo represents the **declarative desired state** of the cluster.
+* Multi-environment deployments (Dev & Prod)
+* Helm-based configuration
+* ArgoCD continuous reconciliation
 
 ---
 
 ## 🏗 Architecture
 
 ```
-GitHub (platform-app)
-        │
-        ▼
-     Jenkins
-        │
-        ▼
-       ECR
-        │
-        ▼
-     ArgoCD
-        │
-        ▼
-        EKS
-   (dev / prod)
+AWS EKS Cluster
+│
+├── Namespace: dev
+│   └── platform-app (dev config)
+│
+└── Namespace: prod
+    └── platform-app (prod config)
 ```
 
-Flow:
+---
 
-1. Code pushed to GitHub
-2. Jenkins builds Docker image
-3. Image pushed to ECR
-4. GitOps values updated
-5. ArgoCD syncs desired state to EKS
+## 🔁 GitOps Workflow
+
+```
+CI Pipeline (Jenkins)
+        ↓
+Update values.yaml (image tag)
+        ↓
+Git Push (this repo)
+        ↓
+ArgoCD detects change
+        ↓
+Sync → Deploy to Kubernetes
+```
+
+---
+
+## 🌱 Environments
+
+### 🔹 Dev
+
+* Automatic deployment
+* Used for testing changes
+* Lower resource configuration
+
+### 🔹 Prod
+
+* Manual promotion from Dev
+* Higher availability configuration
+* Controlled via approval gate
 
 ---
 
 ## 📂 Repository Structure
 
 ```
-envs/
-  ├── dev/
-  └── prod/
-
-helm/platform-app/
-  ├── templates/
-  ├── Chart.yaml
-  └── values.yaml
-```
-
-- `envs/dev` → Development overrides
-- `envs/prod` → Production overrides
-- `helm/platform-app` → Core Helm chart
-
----
-
-# 🚀 Production Hardening & Reliability
-
-This deployment implements production-grade controls.
-
----
-
-## 1️⃣ Health Management
-
-### Liveness & Readiness Probes
-
-Configured in `deployment.yaml` via Helm values.
-
-- Liveness → Restarts unhealthy containers
-- Readiness → Prevents traffic to unhealthy pods
-- `/health` endpoint used for validation
-
-Improves availability and zero-downtime deployments.
-
----
-
-## 2️⃣ Resource Management
-
-CPU and memory requests/limits defined in `values.yaml`.
-
-Benefits:
-
-- Prevents noisy neighbor issues
-- Required for effective HPA
-- Enables predictable scaling behavior
-
----
-
-## 3️⃣ Horizontal Pod Autoscaler (HPA)
-
-Configured using `autoscaling/v2`.
-
-- CPU Target: 60%
-- Memory Target: 70%
-- Min Replicas: 2
-- Max Replicas: 8
-- Custom scale-up / scale-down behavior
-
-Validation commands:
-
-```
-kubectl get hpa -n devops-platforms
-kubectl top pods -n devops-platforms
-```
-
-Load testing supported via temporary busybox pod.
-
----
-
-## 4️⃣ PodDisruptionBudget (PDB)
-
-Ensures availability during:
-
-- Node drain
-- Cluster upgrades
-- Rolling maintenance
-
-Configured with:
-
-- `maxUnavailable: 1`
-
-Prevents service downtime during voluntary disruptions.
-
----
-
-## 🔁 GitOps Rollback Strategy
-
-### Primary Rollback (Recommended)
-
-```
-git revert <bad-commit>
-git push
-```
-
-ArgoCD automatically syncs cluster state.
-
-Benefits:
-
-- Full audit trail
-- Immutable history
-- Clean GitOps model
-
----
-
-### Emergency Rollback (ArgoCD CLI)
-
-```
-argocd app history <app-name>
-argocd app rollback <app-name> <revision>
+.
+├── helm/
+│   └── platform-app/
+│
+├── envs/
+│   ├── dev/
+│   │   └── values.yaml
+│   └── prod/
+│       └── values.yaml
+│
+└── apps/
+    ├── dev/
+    │   └── platform-app.yaml
+    └── prod/
+        └── platform-app.yaml
 ```
 
 ---
 
-## 🛠 Operational Commands
+## ⚙️ Helm Configuration
 
-Check application status:
+* Uses shared Helm chart
+* Environment-specific values via `values.yaml`
+* ConfigMaps used for:
 
-```
-kubectl get pods -n devops-platforms
-kubectl describe deploy <deployment>
-kubectl logs <pod>
-```
-
-Check Argo sync:
-
-```
-argocd app get <app-name>
-```
+  * APP_VERSION
+  * APP_ENV
+  * LOG_LEVEL
 
 ---
 
-## 🎯 Key Platform Capabilities Demonstrated
+## 📊 Monitoring & Observability
 
-- GitOps-based deployment
-- Helm templating
-- Autoscaling with tuned behavior
-- Health management
-- Resource governance
-- High availability controls
-- Declarative rollback strategy
+* Prometheus integrated for metrics collection
+* Grafana dashboards for visualization
+* Application exposes metrics endpoint
 
 ---
 
-## 📌 Related Repository
+## 🛡 Reliability Features
 
-Application source and CI pipeline:
+* Liveness & Readiness probes
+* PodDisruptionBudget
+* Horizontal Pod Autoscaler (HPA)
+* Self-healing via ArgoCD
 
-👉 https://github.com/techngi/platform-apps
+---
+
+## 🔐 Security
+
+* Images scanned via Trivy before deployment
+* Only verified images promoted to production
+
+---
+
+## 🚀 Deployment Strategy
+
+* Git-driven deployments (GitOps)
+* Immutable image versions (Git SHA)
+* Automated sync via ArgoCD
+
+---
+
+## 🎯 Key Benefits
+
+* Declarative infrastructure
+* Environment consistency
+* Easy rollback using Git
+* Reduced manual intervention
+
+---
